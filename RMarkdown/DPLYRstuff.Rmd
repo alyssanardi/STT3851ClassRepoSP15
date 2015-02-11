@@ -19,7 +19,6 @@ epi <- EPIDURAL %>%
   mutate(BMI = Weight/(Height/100)^2) %>%
   select(Doctor, Ease, Treatment, OC, BMI)
 head(epi)
-tail(epi)
 ```
 
 ## Return rows with matching conditions (filter)
