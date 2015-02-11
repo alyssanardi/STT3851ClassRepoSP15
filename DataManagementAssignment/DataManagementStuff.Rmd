@@ -1,0 +1,109 @@
+---
+title: "Data Management Stuff"
+author: ""
+date: "Spring 2015"
+output: html_document
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, warning = FALSE, fig.align = "center")
+library(dplyr)
+library(ggplot2)
+library(descr)
+```
+
+We will consider variables `H1SU1-H1SU3` from the `AddHealth` data set.  We will recode
+responses of 6, 8, and 9 for `H1SU1` as `NA`. (Discuss whether this is appropriate)
+
+```{r}
+library(PDS)
+xtabs(~H1SU1, data = AddHealth)
+AddHealth$H1SU1[AddHealth$H1SU1==6 | AddHealth$H1SU1==8 | AddHealth$H1SU1==9] <- NA
+xtabs(~H1SU1, data = AddHealth)
+AddHealth$H1SU1 <- factor(AddHealth$H1SU1, labels = c("No", "Yes"))[, drop = TRUE]
+xtabs(~H1SU1, data = AddHealth)
+summary(AddHealth$H1SU1)
+freq(AddHealth$H1SU1)
+freq(AddHealth$H1SU1, main = "Did you ever seriously think about committing suicide?", 
+     col = c("skyblue", "gray"))
+ggplot(data = AddHealth, aes(x = H1SU1, fill = H1SU1)) + 
+  geom_bar() + 
+  labs(title = "Did you ever seriously think about committing suicide?", x = "") +
+  theme_bw() 
+```
+
+
+Question `H1SU2` asks the 821 respondents from `H1SU1` "how many times did you attempt suicide?"  Response of
+a 7 should be recoded to `NA`.
+
+```{r}
+xtabs(~H1SU2, data = AddHealth)
+AddHealth$H1SU2[AddHealth$H1SU2==7] <- NA
+xtabs(~H1SU2, data = AddHealth)
+AddHealth$H1SU2 <- factor(AddHealth$H1SU2)[, drop = TRUE]
+xtabs(~H1SU2, data = AddHealth)
+AddHealth$H1SU2 <- factor(AddHealth$H1SU2, 
+                          labels = c("0 times", "1 time", "2 or 3 times", 
+                                     "4 or 5 times", ">= 6 times", "refused", 
+                                     "don't know"))
+summary(AddHealth$H1SU2)
+xtabs(~H1SU2, data = AddHealth)
+NAS <- sum(xtabs(~H1SU2, data = AddHealth)[2:5])  # number that attempted suicide
+NAS
+freq(AddHealth$H1SU2, main = "How many times did you actually attempt suicide?")
+ggplot(data = AddHealth, aes(x = H1SU2)) + 
+  geom_bar(fill = "maroon") + 
+  labs(title = "How many times did you actually attempt suicide?", x= "") +
+  theme_bw() 
+ggplot(data = na.omit(AddHealth[ , "H1SU2", drop = FALSE]), aes(x = H1SU2)) + 
+  geom_bar(fill = "plum") + 
+  labs(title = "How many times did you actually attempt suicide?", x = "") +
+  theme_bw() 
+ggplot(data = na.omit(AddHealth[ , "H1SU2", drop = FALSE]), aes(x = H1SU2, fill = H1SU2)) + 
+  geom_bar() + 
+  labs(title = "How many times did you actually attempt suicide?", x = "") +
+  theme_bw() 
+```
+
+Question `H1SU3` asks of the `r NAS` that attempted suicide if they had to be treated by either a nurse or doctor.  The response of 7 should be recoded to `NA`.
+
+```{r}
+AddHealth$H1SU3[AddHealth$H1SU3 == 7] <- NA
+AddHealth$H1SU3 <- factor(AddHealth$H1SU3, labels = c("No", "Yes"))[, drop = TRUE]
+xtabs(~H1SU3, data = AddHealth)
+freq(AddHealth$H1SU3, main = "Did you require treatment by either a nurse of doctor?")
+ggplot(data = na.omit(AddHealth[ , "H1SU3", drop = FALSE]), aes(x = H1SU3, fill = H1SU3)) + 
+  geom_bar() + 
+  labs(title = "Did you require treatment by either a nurse of doctor?", x = "") +
+  theme_bw() 
+```
+
+## Numeric Variables
+
+Imagine one wants to study GDP and military personnel.  The gapminder code-book indicates the variable
+`armedforcesrate` measures the military personnel as a percentage of the total labor force.  However, no date is given for the data collection.  Using the `WDI` package we decide to run the following:
+
+```{r}
+library(WDI)
+WDIsearch("armed forces")
+WDIsearch("GDP")
+AFP <- WDI(country = "all", indicator = c("MS.MIL.TOTL.TF.ZS", "NY.GDP.PCAP.PP.KD"),
+    start = 2005, end = 2005, extra = FALSE, cache = NULL)
+head(AFP)
+GAP <- inner_join(x = gapminder, y = AFP)
+GAP <- GAP %>%
+  rename(AFR2005 = MS.MIL.TOTL.TF.ZS, GDP2005 = NY.GDP.PCAP.PP.KD) %>%
+  select(armedforcesrate, AFR2005, country, GDP2005)
+head(GAP)
+ggplot(data = GAP, aes(x = AFR2005)) + 
+  geom_density(fill = "pink") + 
+  theme_bw()
+ggplot(data = GAP, aes(x = GDP2005)) + 
+  geom_density(fill = "pink") + 
+  theme_bw()
+ggplot(data = GAP, aes(log(AFR2005), log(GDP2005))) + 
+  geom_point(color = "red") + 
+  theme_bw() +
+  labs(x = "log-Armed Forces Rate (2005)", y = "log-Gross Domestic Product (2005) per Capita")
+cor(log(GAP$AFR2005), log(GAP$GDP2005), use = "complete.obs")
+```

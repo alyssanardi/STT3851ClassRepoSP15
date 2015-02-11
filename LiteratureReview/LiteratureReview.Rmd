@@ -22,7 +22,7 @@ Given the association that I have decided to examine, I use such keywords as _ni
 
 Based on my reading of the articles in the **References** as well as others, I have noted a few common and interesting themes:
 
-1. While it is true that smoking exposure is an ecessary requirement for nicotine dependence, frequency and quantity of smoking are markedly imperfect indices for determining an individual’s probability of exhibiting nicotine dependence (this is true for other drugs as well)
+1. While it is true that smoking exposure is an necessary requirement for nicotine dependence, frequency and quantity of smoking are markedly imperfect indices for determining an individual’s probability of exhibiting nicotine dependence (this is true for other drugs as well)
 
 2. The association may differ based on ethnicity, age, and gender (although there is little work on this)
 
